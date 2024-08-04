@@ -21,7 +21,7 @@ function env_config
     set -xg LC_ALL en_US.UTF-8
 
     # Append local path.
-    set PATH $PATH /usr/local/bin /usr/local/sbin
+    set PATH $PATH /usr/local/bin /usr/local/sbin ~/.local/bin
 
     # Don't set envrionment for root.
     if [ (whoami) = root ]
@@ -33,10 +33,6 @@ function env_config
 
         # Add Homebrew path for macOS ARM plantform.
         set PATH $PATH /opt/homebrew/bin
-
-        # Set the environment variable for Homebrew Bottles mirror (no longer need when use clash tun)
-        # set -xg HOMEBREW_BOTTLE_DOMAIN https://mirrors.tuna.tsinghua.edu.cn/homebrew-bottles/bottles
-        # set -xg HOMEBREW_BOTTLE_DOMAIN https://mirrors.ustc.edu.cn/homebrew-bottles
 
     else if [ (uname) = Linux ]
 
@@ -74,11 +70,6 @@ function env_config
             set -gx QT_QPA_PLATFORMTHEME gtk2
         end
 
-    end
-
-    # Add the local binary path.
-    if [ -e ~/.local/bin ]
-        set PATH $PATH ~/.local/bin
     end
 
     # Add Python pip package binary path (Use Python venv).

@@ -1,12 +1,16 @@
 # Link this file to ~/.ssh/config.
-Host *
-	# Setup the default login username.
-	User root
-	# Skip SSH key check.
-	StrictHostKeyChecking no
-	# Disable fingerprint to known_hosts.
-	UserKnownHostsFile /dev/null
-	# Allow the old version ssh-rsa algorithm.
-	HostkeyAlgorithms +ssh-rsa
-	PubkeyAcceptedAlgorithms +ssh-rsa
-	KexAlgorithms +diffie-hellman-group1-sha1
+
+# For custom user.
+Host *.dainslef.net
+    User dainslef
+
+# Setup the default login username.
+User root
+# Skip SSH key check.
+StrictHostKeyChecking no
+# Disable fingerprint to known_hosts.
+UserKnownHostsFile /dev/null
+# Allow the old version ssh-rsa algorithm.
+HostkeyAlgorithms +ssh-rsa
+PubkeyAcceptedAlgorithms +ssh-rsa
+KexAlgorithms +diffie-hellman-group1-sha1
