@@ -16,9 +16,9 @@ function env_config
 
     # Set language environment.
     # Use "set -x" to create a environment variable.
-    # Use "-xg" to set this environment variable as a global environment variable.
-    set -xg LANG en_US.UTF-8
-    set -xg LC_ALL en_US.UTF-8
+    # Use "-gx" to set this environment variable as a global environment variable.
+    set -gx LANG en_US.UTF-8
+    set -gx LC_ALL en_US.UTF-8
 
     # Append local path.
     set PATH $PATH /usr/local/bin /usr/local/sbin ~/.local/bin
@@ -89,21 +89,26 @@ function env_config
 
     # Set the environment variable for rustup mirror (no longer need when use clash tun).
     # Install rust stable toolchain: $ rustup toolchain install stable.
-    set -xg RUSTUP_DIST_SERVER https://mirrors.ustc.edu.cn/rust-static
+    set -gx RUSTUP_DIST_SERVER https://mirrors.tuna.tsinghua.edu.cn/rustup
 
     # Add Rust Cargo binary path.
     if [ -e ~/.cargo/bin ]
         set PATH $PATH ~/.cargo/bin
     end
 
+    # Set Golang workspace path and add binary path.
+    if type -q go
+        set -gx GOPATH ~/.go
+        set PATH $PATH ~/.go/bin
+    end
+
     # Set preferred editor.
-    if [ -n "$DISPLAY" -o (uname) = Darwin ]
-        and type -q code
-        set -xg EDITOR "code --wait"
+    if [ -n "$DISPLAY" -o (uname) = Darwin ]; and type -q code
+        set -gx EDITOR "code --wait"
     else if type -q vim
-        set -xg EDITOR vim
+        set -gx EDITOR vim
     else
-        set -xg EDITOR vi
+        set -gx EDITOR vi
     end
 
     # For VSCode shell integration support.
