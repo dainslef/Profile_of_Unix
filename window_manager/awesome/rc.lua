@@ -45,7 +45,7 @@ do
 	end
 
 	auto_run({
-		"systemctl --user restart fcitx5", -- Restart fcitx service to avoid some fcitx crash.
+		-- "systemctl --user restart fcitx5", -- Restart fcitx service to avoid some fcitx crash.
 		"xset +dpms", -- Use the power manager.
 		"xset dpms 600 900 1800", -- Set the power manager suspend timeout(15min), screen off timeout(30min).
 		"xset s 600" -- Set screensaver timeout to 10 mintues.
@@ -53,10 +53,9 @@ do
 
 	-- These service should only run once, service can auto run by systemd service.
 	auto_run {
-		-- "nm-applet", -- Show network status.
-		-- "picom", -- For transparent and other window effects support.
-		-- "fcitx5",
-		-- "clash-premium" -- Clash proxy provided by custom systemd service.
+		"nm-applet", -- Show network status.
+		"picom", -- For transparent and other window effects support.
+		"fcitx5",
 		-- "blueman-applet", -- Use bluetooth.
 	}
 end
@@ -304,6 +303,11 @@ do
 		-- If current route is empty, then get wifi net device name.
 		-- Use Regex Lookarounds feature to find 'w*' net device.'
 		net_device = get_command_output("ip addr | grep -oP '(?<=: )w[\\w]+'")
+	end
+	if net_device == "" then
+		-- If current wifi is empty, then get ethernet net device name.
+		-- Use Regex Lookarounds feature to find 'e*' net device.'
+		net_device = get_command_output("ip addr | grep -oP '(?<=: )e[\\e]+'")
 	end
 	local net_format = "🌐 ${" .. net_device .. " down_kb}KB "
 	vicious.register(net_widget, vicious.widgets.net, net_format, widget_refresh_span)

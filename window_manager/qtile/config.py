@@ -53,13 +53,12 @@ mod = "mod4"
 # Set auto start commands.
 # Currently autorun by systemd service.
 once_cmds = [
-    # "nm-applet",  # Show network status.
-    # "picom",  # Compositing manager, for transparent support.
-    # "fcitx5", # Fcitx5 is provided by systemd service.
+    "nm-applet",  # Show network status.
+    "picom",  # Compositing manager, for transparent support.
+    "fcitx5", # Fcitx5 is provided by systemd service.
     # "clash-premium",  # Clash proxy is provided by systemd service.
 ]
 normal_cmds = [
-    "systemctl --user start pulseaudio",  # In NixOS PulseAudio should restart during window manager startup, otherwise command can't get PulseAudio volume correctly.
     "xset +dpms",
     "xset dpms 600 900 1800",
     "xset s 600",
