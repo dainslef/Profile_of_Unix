@@ -4,8 +4,25 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ lib, pkgs, config, modulesPath, ... }:
+{ lib, config, modulesPath, ... }:
 
+let
+  # Use some packages from unstable channel.
+  # Need to add unstable channel at first:
+  # sudo nix-channel --add https://nixos.org/channels/nixpkgs-unstable nixpkgs-unstable
+  unstablePkgs = import <nixpkgs-unstable> {
+    config = {
+      allowUnfree = true; # Allow some unfree software (like VSCode and Chrome).
+      allowInsecurePredicate = pkg: true; # Allow all insecure packages (Who care insecure?).
+      packageOverrides = pkgs: {
+        # Add NUR repo.
+        nur = import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/master.tar.gz") {
+          inherit pkgs;
+        };
+      };
+    };
+  };
+in
 {
   imports = [
     # Include config detection.
@@ -18,8 +35,8 @@
   # Set up boot options.
   boot = {
     # Set the custom linux kernel.
-    kernelPackages = pkgs.linuxPackages_zen; # Zen Kernel.
-    # kernelPackages = pkgs.linuxPackages_latest; # Offical Kernel.
+    kernelPackages = unstablePkgs.linuxPackages_zen; # Zen Kernel.
+    # kernelPackages = unstablePkgs.linuxPackages_latest; # Offical Kernel.
     initrd.availableKernelModules = [ "xhci_pci" "thunderbolt" "nvme" ]; # Necessary Kernel Module.
     # Set boot loader.
     loader = {
@@ -32,12 +49,6 @@
   # Set up networking.
   networking = {
     networkmanager.enable = true;
-    proxy = {
-      # Set up proxy (for Clash).
-      allProxy = "127.0.0.1:9999";
-      httpProxy = "http://127.0.0.1:9999";
-      httpsProxy = "http://127.0.0.1:9999";
-    };
     # NixOS enabled firewall by default, so need to allow some ports.
     firewall.allowedUDPPorts = [
       8964 # For custom use.
@@ -45,8 +56,6 @@
     firewall.allowedTCPPorts = [
       8964 # For custom use.
       9999 # For Clash service.
-      8384 # For Syncthing WEB UI.
-      22000 # For Syncthing data transmission.
     ];
   };
 
@@ -58,31 +67,36 @@
 
   # Container and VM.
   virtualisation = {
-    lxc.lxcfs.enable = true;
-    lxd.enable = true;
-    docker.enable = true;
+    containerd.enable = true;
+    libvirtd.enable = true;
   };
 
   # Set up some programs' feature.
   programs = {
-    fish.enable = true; # Enable fish feature will set up environment shells (/etc/shells) for Account Service.
     vim.defaultEditor = true; # Set up default editor.
+    fish.enable = true; # Enable fish feature will set up environment shells (/etc/shells) for Account Service.
+    virt-manager.enable = true; # Use virtual machine manager.
+    java.enable = true; # Enable Java support.
+    git.enable = true;
+    screen.enable = true;
     wireshark = {
       enable = true; # Enable wireshark and create wireshark group (Let normal user can use wireshark).
-      package = pkgs.wireshark; # Use wireshark-qt as wireshark package (Default package is wireshark-cli).
+      package = unstablePkgs.wireshark; # Use wireshark-qt as wireshark package (Default package is wireshark-cli).
     };
   };
 
   # List packages installed in system profile.
-  environment.systemPackages = with pkgs; [
-    # Nix Language Server.
-    rnix-lsp
+  environment.systemPackages = with unstablePkgs; [
+    # Nix Language.
+    nixpkgs-fmt
     # C/C++/Rust/Haskell compiler and build tools.
     binutils
     gcc
     clang
+    musl
     rustup
     stack
+    go
     cmake
     gnumake
     # Debugger and Reverse Engineering tools.
@@ -90,15 +104,14 @@
     lldb
     radare2
     # Java and .Net SDK.
-    jdk
     scala
     visualvm
     dotnet-sdk
-    # Python SDK, in NixOS, system pip can't install module, set up pip module in configuration or use venv.
+    # Python SDK, in NixOS, system pip can't install module, set up pip module in configuration or use venv/pipx.
     # Use "python -m venv xxx_dir" to create virtual environments.
     python3 # (python3.withPackages (p: [p.black p.jupyter p.ansible-core]))
+    pipx
     # Other SDK and develop tools.
-    git
     nodejs
     kubectl
     kubernetes-helm
@@ -112,16 +125,16 @@
     file
     tree
     btop
-    screen
+    openssh
     usbutils
     pciutils
     exfatprogs
     # Service and command line tools.
     nmap
-    openssh
-    neofetch
+    # openssh
+    fastfetch
     p7zip
-    qemu
+    nerdctl
     opencc
     syncthing
     # GUI tools
@@ -130,22 +143,18 @@
     gimp
     google-chrome
     thunderbird
-    goldendict
     blender
+    wpsoffice
     bottles
+    # Wechat.
+    nur.repos.xddxdd.wechat-uos
     # Man pages (POSIX API and C++ dev doc).
     man-pages-posix
     stdmanpages
-    # Clash.
-    nur.repos.linyinfeng.clash-premium # nur.repos.linyinfeng.clash-for-windows
-    # Wechat.
-    nur.repos.xddxdd.wechat-uos
   ] ++ config.custom.extraPackages;
 
   # Config services.
-  services.xserver = {
-    # Enable GUI, config the X11 windowing system.
-    enable = true; # Must enable xserver for desktop environments.
+  services = {
     libinput = {
       enable = true; # Enable touchpad support.
       touchpad.naturalScrolling = true;
@@ -156,48 +165,38 @@
     extraConfig = "DefaultTimeoutStopSec=5s";
     # Disable autostart of some service.
     services = {
-      lxd.wantedBy = lib.mkForce [ ];
-      lxcfs.wantedBy = lib.mkForce [ ];
-      docker.wantedBy = lib.mkForce [ ];
-    };
-    # Setup user service.
-    user.services.clash = {
-      # Define a custom clash service.
-      wantedBy = [ "default.target" ];
-      after = [ "network.target" ];
-      description = "A rule-based tunnel in Go.";
-      serviceConfig = {
-        ExecStart = "/run/current-system/sw/bin/clash-premium &";
-      };
+      libvirtd.wantedBy = lib.mkForce [ ];
     };
   };
 
   # Config fonts.
   fonts = {
-    enableDefaultFonts = true;
-    fonts = with pkgs; [ cascadia-code noto-fonts noto-fonts-cjk-sans ];
+    enableDefaultPackages = true;
+    packages = with unstablePkgs; [ cascadia-code noto-fonts noto-fonts-cjk-sans ];
     fontconfig = {
       defaultFonts = {
         serif = [ "Noto Sans" ];
         sansSerif = [ "Noto Sans" ];
-        monospace = [ "Cascadia Code PL" ];
+        monospace = [ "Cascadia Code NF" ];
       };
     };
   };
 
   # Enable sound.
-  hardware.pulseaudio.enable = true;
+  #hardware.pulseaudio.enable = true;
+  hardware.enableAllFirmware = true;
+  sound.enable = true;
 
   # Power Management Policy.
   powerManagement.cpuFreqGovernor = "ondemand";
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users = {
-    defaultUserShell = pkgs.fish;
+    defaultUserShell = unstablePkgs.fish;
     users.dainslef = {
       isNormalUser = true;
-      # Enable sudo/network/wireshark/lxd/docker permission for normal user.
-      extraGroups = [ "wheel" "networkmanager" "wireshark" "lxd" "docker" ];
+      # Enable sudo/network/wireshark permission for normal user.
+      extraGroups = [ "wheel" "audio" "networkmanager" "wireshark" "libvirtd" ];
     };
   };
 
@@ -212,22 +211,13 @@
     ";
   };
 
-  nixpkgs.config = {
-    allowUnfree = true; # Allow some unfree software (like VSCode and Chrome).
-    allowInsecurePredicate = pkg: true; # Allow all insecure packages (Who care insecure?).
-    packageOverrides = pkgs: {
-      # Add NUR repo.
-      nur = import (builtins.fetchTarball "https://github.com/nix-community/NUR/archive/master.tar.gz") {
-        inherit pkgs;
-      };
-    };
-  };
+  nixpkgs.config.allowUnfree = true; # Allow some unfree software (Linux Firmware).
   nix.settings = {
     auto-optimise-store = true; # Enable nix store auto optimise.
     # Replace custom nixos channel with TUNA mirror:
-    # sudo nix-channel --add https://mirrors.tuna.tsinghua.edu.cn/nix-channels/nixos-unstable
+    # sudo nix-channel --add https://mirrors.tuna.tsinghua.edu.cn/nix-channels/nixos-*
     # or use USTC Mirror:
-    # sudo nix-channel --add https://mirrors.ustc.edu.cn/nix-channels/nixos-unstable
+    # sudo nix-channel --add https://mirrors.ustc.edu.cn/nix-channels/nixos-*
     substituters = [
       # Binary Cache Mirrors.
       "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"

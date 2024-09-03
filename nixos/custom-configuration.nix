@@ -3,6 +3,8 @@
 
 { lib, pkgs, config, ... }:
 
+# Use some unstable packages.
+let unstablePkgs = import <nixpkgs-unstable> { }; in
 with lib; {
   # Use 'options' object to define custom options.
   options = {
@@ -62,7 +64,7 @@ with lib; {
     })
     (mkIf config.custom.desktop.wm {
       # Csutom packages for window manager.
-      custom.extraPackages = with pkgs; [
+      custom.extraPackages = with unstablePkgs; [
         xdg-user-dirs
         networkmanagerapplet
         kitty
@@ -84,10 +86,12 @@ with lib; {
         };
         # Set up the XServer.
         xserver = {
-          # Start xdg autostart service when only use window manager (No desktop environment).
-          desktopManager.runXdgAutostartIfNone = true;
+          enable = true;
+          displayManager.lightdm = {
+            enable = true;
+            greeters.gtk.extraConfig = "background=/boot/background.jpg";
+          };
           # Set up display manager.
-          displayManager.lightdm.greeters.gtk.extraConfig = "background=/boot/background.jpg";
           windowManager = {
             # Enable Qtile.
             qtile.enable = true;
@@ -102,28 +106,31 @@ with lib; {
     })
     (mkIf config.custom.desktop.kde {
       # Custom packages for KDE.
-      custom.extraPackages = with pkgs; [
-        libsForQt5.yakuake
-        libsForQt5.sddm-kcm
+      custom.extraPackages = with pkgs.kdePackages; [
+        yakuake
+        # kmix # Enable for ALSA volume.
       ];
-      services.xserver = {
-        displayManager.sddm.enable = true; # Plasma use SDDM as display manager.
-        desktopManager.plasma5 = {
+      services = {
+        displayManager.sddm = {
+          wayland.enable = true;
+          enable = true; # Plasma use SDDM as display manager.
+          enableHidpi = false;
+        };
+        desktopManager.plasma6 = {
           enable = true;
-          phononBackend = "vlc"; # Use VLC as media backend.
         };
       };
     })
     (mkIf config.custom.desktop.gnome {
       # Set up Qt look style.
-      qt5 = {
+      qt = {
         enable = true; # Enable Qt theme config.
         style = "adwaita"; # Let Qt use Adwaita style.
         platformTheme = "gnome";
       };
       # Custom packages for GNOME.
       custom.extraPackages = with pkgs;
-        [ btop kitty ] ++ # Use btop and kitty instead of gnome-system-monitor and gnome-terminal.
+        [ kitty ] ++ # Use btop and kitty instead of gnome-system-monitor and gnome-terminal.
         (with gnome; [ nautilus file-roller eog gnome-tweaks ]) ++
         (with gnomeExtensions; [ blur-my-shell ddterm net-speed-simplified ]);
       services = {
@@ -148,7 +155,7 @@ with lib; {
     })
     (mkIf config.custom.desktop.xfce {
       # Set up Qt look style.
-      qt5 = {
+      qt = {
         enable = true; # Enable Qt theme config.
         style = "gtk2"; # Let Qt use GTK style.
         platformTheme = "gtk2";
