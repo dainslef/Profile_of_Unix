@@ -1,11 +1,5 @@
 # Link this file to ~/.ssh/config.
 
-# For custom user.
-Host *.dainslef.net
-    User dainslef
-
-# Setup the default login username.
-User root
 # Skip SSH key check.
 StrictHostKeyChecking no
 # Disable fingerprint to known_hosts.
@@ -14,3 +8,14 @@ UserKnownHostsFile /dev/null
 HostkeyAlgorithms +ssh-rsa
 PubkeyAcceptedAlgorithms +ssh-rsa
 KexAlgorithms +diffie-hellman-group1-sha1
+
+# Set keepalive interval.
+ServerAliveInterval 10
+ServerAliveCountMax 3
+
+# For custom user.
+Host *.dainslef.net
+    User dainslef
+# Setup the default login username.
+Host *
+    User root
