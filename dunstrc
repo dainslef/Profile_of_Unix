@@ -1,10 +1,19 @@
 # Dunst configuration, link this file to ~/.config/dunst/dunstrc
 
 [global]
-	# Set up the transparency
-	transparency = 15
+    # Set up the transparency
+    transparency = 15
 
-	# Change the default notification actions.
-	mouse_left_click = do_action, close_current
-	mouse_middle_click = close_all
-	mouse_right_click = close_current
+    # Change the default notification actions.
+    mouse_left_click = do_action, close_current
+    mouse_middle_click = close_all
+    mouse_right_click = close_current
+
+    # Set notification place and size.
+    gap_size = 10
+    offset = 30x70
+
+    # Set the notification color.
+    background = "#445566"
+    highlight = "#DDDDDD"
+    frame_color = "#AAAAAA"
