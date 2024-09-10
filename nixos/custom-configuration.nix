@@ -68,7 +68,7 @@ with lib; {
         xdg-user-dirs
         networkmanagerapplet
         kitty
-        ranger
+        yazi
         ueberzug
         flameshot
         brightnessctl # For brightness control.

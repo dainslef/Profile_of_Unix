@@ -67,7 +67,7 @@ in
 
   # Container and VM.
   virtualisation = {
-    containerd.enable = true;
+    docker.enable = true;
     libvirtd.enable = true;
   };
 
@@ -93,7 +93,6 @@ in
     binutils
     gcc
     clang
-    musl
     rustup
     stack
     go
@@ -125,16 +124,15 @@ in
     file
     tree
     btop
-    openssh
     usbutils
     pciutils
     exfatprogs
+    clash-meta
     # Service and command line tools.
     nmap
-    # openssh
     fastfetch
     p7zip
-    nerdctl
+    openssh
     opencc
     syncthing
     # GUI tools
@@ -147,14 +145,19 @@ in
     wpsoffice
     bottles
     # Wechat.
-    nur.repos.xddxdd.wechat-uos
-    # Man pages (POSIX API and C++ dev doc).
+    wechat-uos
+    # Man pages (Linux/POSIX API and C++ API doc).
+    man-pages
     man-pages-posix
     stdmanpages
   ] ++ config.custom.extraPackages;
 
   # Config services.
   services = {
+    dictd = {
+      enable = true; # Enable dictionary.
+      DBs = with unstablePkgs.dictdDBs; [ wordnet wiktionary eng2jpn ];
+    };
     libinput = {
       enable = true; # Enable touchpad support.
       touchpad.naturalScrolling = true;
@@ -195,8 +198,8 @@ in
     defaultUserShell = unstablePkgs.fish;
     users.dainslef = {
       isNormalUser = true;
-      # Enable sudo/network/wireshark permission for normal user.
-      extraGroups = [ "wheel" "audio" "networkmanager" "wireshark" "libvirtd" ];
+      # Enable sudo/network/wireshark/docker permission for normal user.
+      extraGroups = [ "wheel" "audio" "networkmanager" "wireshark" "libvirtd" "docker" ];
     };
   };
 
