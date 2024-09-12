@@ -107,7 +107,7 @@ beautiful.init(awful.util.get_themes_dir() .. "default/theme.lua") -- Init theme
 
 -- Custom theme settings, border and font.
 -- All custom settings can find at https://awesomewm.org/doc/api/documentation/06-appearance.md.html.
-beautiful.font = "Cascadia Code PL 10"
+beautiful.font = "Cascadia Code NF 10"
 beautiful.border_width = border_width
 beautiful.master_width_factor = 0.6 -- Set the master window percent.
 beautiful.useless_gap = beautiful.border_width -- Set the window Gap size (equals to border width).
@@ -138,7 +138,7 @@ end
 -- This is used later as the default terminal and editor to run.
 local mail = "thunderbird"
 local browser = "google-chrome-stable"
-local file_manager = "ranger"
+local file_manager = "yazi"
 local screen_locker = "dm-tool lock"
 local top = "btop"
 
@@ -471,6 +471,7 @@ function volume_change(change)
     local alsa_get_volume_command = "amixer -M get Master | grep -Po '\\d+(?=%\\])'"
     awful.spawn.easy_async_with_shell(alsa_get_volume_command, function(volume)
         volume = math.floor(volume + change)
+        volume = volume > 100 and 100 or volume -- Check if the new volume is out of limit.
         awful.spawn("amixer -M set Master " .. volume .. "%")
         naughty.destroy(volume_notify)
         volume_notify = naughty.notify {
