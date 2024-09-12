@@ -55,8 +55,7 @@ mod = "mod4"
 once_cmds = [
     "nm-applet",  # Show network status.
     "picom",  # Compositing manager, for transparent support.
-    "fcitx5", # Fcitx5 is provided by systemd service.
-    # "clash-premium",  # Clash proxy is provided by systemd service.
+    "fcitx5",
 ]
 normal_cmds = [
     "xset +dpms",
@@ -112,8 +111,7 @@ class Color:
 class Application:
     MAIL = "thunderbird"
     BROWSER = "google-chrome-stable"
-    DICTIONARY = "goldendict"
-    FILE_MANAGER = "ranger"
+    FILE_MANAGER = "yazi"
     LOCK_SCREEN = "dm-tool lock"
 
     # Find the next normal window (Skip the minimized window).
@@ -298,9 +296,7 @@ def toggle_window(
 
 @lazy.function
 def hide_floating_terminals(qtile: Qtile):
-    terminals = [
-        w for w in qtile.current_group.windows if w.floating and w.is_terminal()
-    ]
+    terminals = [w for w in qtile.current_group.windows if w.floating and w.is_terminal()]
     terminals.reverse()  # Reverse terminal windows' order, then move to terminal group.
     [w.togroup(Application.Terminal.GROUP_NAME) for w in terminals]
 
@@ -403,7 +399,6 @@ keys = [
     # Open custom applications.
     Key([mod], "m", lazy.spawn(Application.MAIL), desc="Mail"),
     Key([mod], "b", lazy.spawn(Application.BROWSER), desc="Google Chrome Browser"),
-    Key([mod], "d", lazy.spawn(Application.DICTIONARY), desc="Golden Dict"),
     Key([mod], "l", lazy.spawn(Application.LOCK_SCREEN), desc="Lock Screen"),
     Key(
         [mod],
@@ -546,7 +541,7 @@ bar_height, margin, border_width = scaling_size(25), scaling_size(5), scaling_si
 
 # Set widget default config and screen widgets.
 widget_defaults = dict(
-    font="Cascadia Code PL", fontsize=font_size, padding=font_padding
+    font="Cascadia Code NF", fontsize=font_size, padding=font_padding
 )
 screens = [
     # By default, Qtile layout window margin will cause the gap between two window double size,
