@@ -1,44 +1,38 @@
-<?xml version='1.0'?>
-<!DOCTYPE fontconfig SYSTEM 'fonts.dtd'>
-
-<!-- Link this file (if need) to path ~/.config/fontconfig/fonts.conf -->
+<?xml version="1.0"?>
+<!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
+<!-- /etc/fonts/fonts.conf file to configure system font access -->
 <fontconfig>
-
-	<!-- Default fonts -->
-	<alias binding="same">
+	<description>Default configuration file</description>
+	<alias>
 		<family>sans-serif</family>
 		<prefer>
+			<family>Noto Sans Mono CJK TC</family>
 			<family>Noto Sans</family>
 		</prefer>
 	</alias>
-
-	<alias binding="same">
+	<alias>
 		<family>serif</family>
 		<prefer>
+			<family>Noto Sans Mono CJK TC</family>
 			<family>Noto Sans</family>
 		</prefer>
 	</alias>
-
-	<alias binding="same">
+	<alias>
 		<family>monospace</family>
 		<prefer>
 			<family>Cascadia Code PL</family>
 		</prefer>
 	</alias>
-
-	<alias binding="same">
-		<family>emoji</family>
-		<prefer>
-			<family>Cascadia Code PL</family>
-			<family>Noto Color Emoji</family>
-		</prefer>
-	</alias>
-
-	<alias binding="same">
+	<alias>
 		<family>system-ui</family>
 		<prefer>
 			<family>Cascadia Code PL</family>
-			<family>Noto Sans</family>
+		</prefer>
+	</alias>
+	<alias>
+		<family>emoji</family>
+		<prefer>
+			<family>Noto Color Emoji</family>
 		</prefer>
 	</alias>
 
